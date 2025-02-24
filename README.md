@@ -73,8 +73,8 @@ Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a m
 | id          | UUID    | PRIMARY KEY                             |
 | user_id    | UUID   | FOREIGN KEY → users(id)           |
 | location_id | UUID    | FOREIGN KEY -> locations(id)            |
-| status       | TEXT        | ENUM (pending, under_review, approved, declined, suspended) |
-| approved_by | UUID   | FOREIGN KEY -> admins(id)     |
+| status       | TEXT        | ENUM (pending, under_review, activated, declined, suspended) |
+| active_by | UUID   | FOREIGN KEY -> admins(id)     |
 
 ### 📋 Vendor Feedback Table
 | Column     | Type    | Constraints                        |
@@ -83,7 +83,6 @@ Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a m
 | vendor_id  | UUID   | FOREIGN KEY → vendors(id)         |
 | feedback   | TEXT   | NOT NULL                           |
 | reply      | TEXT   | NULLABLE                           |
-| status     | ENUM   | ('pending', 'addressed', 'closed') |
 | created_by | UUID   | FOREIGN KEY -> admins(id)     |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP      |
 
@@ -95,8 +94,8 @@ Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a m
 | image_url   | TEXT   | NULLABLE                        |
 | description | TEXT   | NULLABLE                        |
 | category_id | UUID   | FOREIGN KEY -> food_categories(id) |
-| status       | TEXT        | ENUM (pending, under_review, approved) |
-| approved_by | UUID   | FOREIGN KEY -> admins(id)     |
+| status       | TEXT        | ENUM (declined, activated) |
+| activated_by | UUID   | FOREIGN KEY -> admins(id)     |
 
 ### 🥗 Food Category Table
 | Column      | Type         | Constraints          |
@@ -112,7 +111,7 @@ Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a m
 | food_id      | UUID   | FOREIGN KEY -> food_items(id)   |
 | price        | DECIMAL | NOT NULL                       |
 | discount     | DECIMAL | DEFAULT 0                      |
-| status       | TEXT        | ENUM (active, not_active) |
+| status       | TEXT        | ENUM (activated, not_activated) |
 | created_at   | TIMESTAMP  | DEFAULT CURRENT_TIMESTAMP           | When the preference was created |
 | updated_at   | TIMESTAMP  | DEFAULT CURRENT_TIMESTAMP ON UPDATE | When the preference was last updated |
 
@@ -134,10 +133,8 @@ Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a m
 | user_id     | UUID        | FOREIGN KEY -> users(id) |
 | vendor_id   | UUID        | FOREIGN KEY -> vendors(id) |
 | rider_id    | UUID        | FOREIGN KEY -> riders(id) |
-| status      | TEXT        | ENUM (preparing, picked_up, completed, cancelled) |
-| otp_user    | TEXT        | NOT NULL                 |
-| otp_vendor  | TEXT        | NOT NULL                 |
-| otp_rider   | TEXT        | NOT NULL                 |
+| status      | TEXT        | ENUM (confirmed, picked_up, completed, cancelled) |
+| otp         | TEXT        | NOT NULL                 |
 
 ### 📦 Order_Food_Item Table (Links Ordered Food Items with Orders)
 | Column      | Type    | Constraints                   |
@@ -185,7 +182,29 @@ Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a m
 | id         | UUID        | PRIMARY KEY         |
 | user_id    | UUID   | FOREIGN KEY → users(id)           |
 | profile_pic_url       | TEXT        | NOT NULL            |
-| status       | TEXT        | ENUM (pending, under_review, approved) |
+| status       | TEXT        | ENUM (pending, under_review, activated, suspended) |
+
+## 🚫💸 Rider Penalty Table
+
+| Column Name       | Data Type        | Constraints          | Description                           |
+|-------------------|-----------------|----------------------|--------------------------------------|
+| id              | INT              | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for each penalty record |
+| rider_id        | INT              | FOREIGN KEY (riders.id) | Rider associated with the penalty    |
+| order_id        | INT              | FOREIGN KEY (orders.id) | Order for which the penalty was issued |
+| penalty_amount  | DECIMAL(10,2)    | NOT NULL             | Amount of the penalty                |
+| penalty_reason  | VARCHAR(255)     | NOT NULL             | Reason for the penalty (e.g., "Failed delivery", "Late pickup") |
+| penalty_status  | ENUM('Unpaid', 'Paid', 'Disputed') | DEFAULT 'Unpaid' | Current status of the penalty       |
+| issued_at       | TIMESTAMP        | DEFAULT CURRENT_TIMESTAMP | Date and time when penalty was issued |
+| due_date        | DATE             | NOT NULL             | Deadline for penalty payment         |
+| paid_at         | TIMESTAMP        | NULLABLE             | Date and time when the penalty was paid |
+| dispute_reason  | VARCHAR(255)     | NULLABLE             | Reason provided if the penalty is disputed |
+| resolved_at     | TIMESTAMP        | NULLABLE             | Date and time when a dispute was resolved |
+
+### Indexes
+- `rider_id` for quicker lookups of penalties by rider
+- `order_id` to trace penalties to specific orders
+- `penalty_status` for easy filtering by payment or dispute status
+
 
 
 ## Operational Workflow
