@@ -1,14 +1,14 @@
-# Tiny-Pandas
+# Tiny Pandas
 
 Tiny-Pandas is a food delivery platform inspired by Foodpanda, designed with a microservices architecture. It allows users to browse restaurants, place orders, and receive deliveries via riders. Vendors manage their food listings, and admins oversee the system.
 
 ## Tech Stack
-- 🔙 **Backend:** Golang, Python (if necessary)
+- 🔙 **Backend:** Golang, Python
 - 🗄️ **Database:** PostgreSQL
 - 🔗 **Communication:** gRPC, Kafka
 - 🔐 **Authentication:** RBAC (Role-Based Access Control)
 - 🏗️ **Orchestration:** Minikube (for local development)
-- 🎨 **Frontend:** React
+- 🎨 **Frontend:** Next.js
 
 ## **Microservices**  
 
